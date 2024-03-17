@@ -163,7 +163,7 @@ pub mod rbtree {
             }
             // set the right node of the node be the right_left node
             if let Some(ref node_in) = node_self {
-                node_in.borrow_mut().right = node_right_left;
+                node_in.borrow_mut().right = Some(node_right_left);
             }
             if let Some(ref right_left) = node_right_left {
                 right_left.borrow_mut().parent = Some(Rc::downgrade(&node_self));
@@ -175,14 +175,42 @@ pub mod rbtree {
             if let Some(ref right_left_right) = node_right_left_right {
                 right_left_right.borrow_mut().parent = Some(Rc::downgrade(&node_right));
             }
-
+            // do the rr rotate
             let node_some: RedBlackTree = rr_rotate(&node_self);
 
             node_some
         }
 
         pub fn lr_rotate(node: &Tree) -> RedBlackTree {
-            
+            let node_self = node.borrow().clone()?;
+            let node_left = node.borrow().left.clone()?;
+            let node_left_right = node_left.borrow().right.clone()?;
+            let node_left_right_left = node_left_right.borrow().left.clone()?;
+            // set the left node of the left_right node be the left node
+            if let Some(ref left_right) = node_left_right {
+                left_right.borrow_mut().left = Some(node_left);
+            }
+            if let Some(ref left) = node_left {
+                left.borrow_mut().parent = Some(Rc::downgrade(&node_left_right));
+            }
+            // set the left node of the node be the left_right node
+            if let Some(ref node_in) = node_self {
+                node_in.borrow_mut().left = Some(node_left_right);
+            }
+            if let Some(ref left_right) = node_left_right {
+                left_right.borrow_mut().parent = Some(Rc::downgrade(&node_self));
+            }
+            // set the left_right node of the left node be the left_right_left node
+            if let Some(ref left) = node_left {
+                left.borrow_mut().right = Some(node_left_right_left);
+            }
+            if let Some(ref left_right_left) = node_left_right_left {
+                left_right_left.borrow_mut().parent = Some(Rc::downgrade(&node_left));
+            }
+            // do the ll rotate
+            let node_some: RedBlackTree = ll_rotate(&node_self);
+
+            node_some
         }
 
         pub fn get_parent_key(&self) -> Option<u32> {
