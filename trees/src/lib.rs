@@ -145,6 +145,10 @@ pub mod rbtree {
                 // If there is no parent, this node was the root
                 println!("The original node was the root node.");
             }
+
+            let node_color = node.borrow().color.clone();
+            node.borrow_mut().color = node_right.borrow().color.clone();
+            node_right.borrow_mut().color = node_color;
     
             Some(node_right)
         }
