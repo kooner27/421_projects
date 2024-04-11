@@ -1,9 +1,3 @@
-mod connect4;
-use connect4::*;
-mod toot_otto;
-use toot_otto::*;
-
-
 
 use yew::prelude::*;
 
@@ -28,26 +22,22 @@ enum Difficulty {
 
 #[function_component(Game)]
 fn app() -> Html {
-    // game started
-    let game_started = use_state(|| false);    
-    // game difficulty
-    let difficulty = use_state(|| Difficulty::Easy);
-      
+    // game dimension
+    let width = 6;
+    let height = 4;
+    let board_ot = use_state(|| vec![vec![Tile::Empty; width]; height]);
     // player 1 starts the game
     let current_player = use_state(|| 1);
     // the winner
     let winner = use_state(|| -1);
-    // game dimension  
-    let width = 6;
-    let height = 4;
-    let board_outline = use_state(|| vec![vec![Tile::Empty; width]; height]);
-
     // game type
     let game_type = use_state(|| GameType::Otto);
 
+    // game difficulty
+    let difficulty = use_state(|| Difficulty::Easy);
 
-
-
+    // game started
+    let game_started = use_state(|| false);
 
     // Function to handle a player move
     // let handle_click = {
@@ -69,12 +59,12 @@ fn app() -> Html {
     //     })
     // };
     let handle_click = {
-        let board_outline = board_outline.clone();
+        let board_ot = board_ot.clone();
         let current_player = current_player.clone();
         let winner = winner.clone();
         let game_type = game_type.clone();
         Callback::from(move |(row, col): (usize, usize)| {
-            let mut board = (*board_outline).clone();
+            let mut board = (*board_ot).clone();
             // Iterate from the bottom of the column upwards
             for row in (0..height).rev() {
                 if board[row][col] == Tile::Empty {
@@ -94,20 +84,7 @@ fn app() -> Html {
                             }
                         }
                     };
-                    board_outline.set(board);
-                    // Check for a win
-                    // match *game_type {
-                    //     GameType::Otto => {
-                    //         if toot_otto::Board::check_win(&board, row, col) {
-                    //             winner.set(*current_player);
-                    //         }
-                    //     }
-                    //     GameType::Connect4 => {
-                    //         if connect4::Board::check_win(&board, row, col) {
-                    //             winner.set(*current_player);
-                    //         }
-                    //     }
-                    // }
+                    board_ot.set(board);
                     // Switch player turn
                     current_player.set(if *current_player == 1 { 2 } else { 1 });
                     break; // Exit the loop once we've found the first empty tile from the bottom
@@ -125,7 +102,7 @@ fn app() -> Html {
 
     let handle_cancel = {
         let game_started = game_started.clone();
-        let board_ot = board_outline.clone();
+        let board_ot = board_ot.clone();
         Callback::from(move |_| {
             game_started.set(false);
             board_ot.set(vec![vec![Tile::Empty; width]; height]);
@@ -154,7 +131,7 @@ fn app() -> Html {
                 { if *game_started {
                     html! {
                         <div style="display: grid; grid-template-columns: repeat(6, 50px); gap: 5px;">
-                            { for board_outline.iter().enumerate().map(|(row, line)| html! {
+                            { for board_ot.iter().enumerate().map(|(row, line)| html! {
                                 { for line.iter().enumerate().map(|(col, &tile)| {
                                     let on_click = {
                                         let row = row;
