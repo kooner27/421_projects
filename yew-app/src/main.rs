@@ -71,7 +71,7 @@ impl Component for Game {
             <>
                 <h1>{ "Connect Four" }</h1>
                 <div>
-                    <h3 class="title is-4">{["Status: ", self.get_status_msg(&board).as_str()].concat() }</h3>
+                    <h3 class="title is-4">{["Current Turn: ", self.get_status_msg(&board).as_str()].concat() }</h3>
                 </div>
                 <div>
                     {
