@@ -217,6 +217,8 @@ fn display_cell(cell: &Cell) -> String {
 }
 
 
+
+
 #[function_component(ConnectFourGame)]
 fn connect_four_game() -> Html {
 
@@ -224,14 +226,52 @@ fn connect_four_game() -> Html {
 
     let board = use_state(|| Board::new(6, 7)); // Initialize the board
 
+    // let on_column_click = {
+    //     let board = board.clone();
+    //     Callback::from(move |col: usize| {
+    //         let mut b = (*board).clone(); // Clone the current board state
+    //         b.insert_disc(col).ok(); // Ignore errors for simplicity
+    //         board.set(b); // Update the board state
+    //     })
+    // };
+
+    // works but requires clicking for them to execute
+    // let on_column_click = {
+    //     let board = board.clone();
+    //     Callback::from(move |col: usize| {
+    //         let mut b = (*board).clone(); // Clone the current board state
+    //         b.insert_disc(col).ok(); // Ignore errors for simplicity
+    //         board.set(b); // Update the board state
+    
+    //         // Check if it's the player's turn before calling the AI's action
+    //         if board.current_turn == Player::Yellow {
+    //             // AI's action
+    //             let random_col = rand::random::<usize>() % board.cols;
+    //             let mut b = (*board).clone();
+    //             b.computer_move().ok();
+    //             board.set(b);
+    //         }
+    //     })
+    // };
+
     let on_column_click = {
         let board = board.clone();
         Callback::from(move |col: usize| {
             let mut b = (*board).clone(); // Clone the current board state
             b.insert_disc(col).ok(); // Ignore errors for simplicity
             board.set(b); // Update the board state
+    
+            // Check if it's the player's turn before calling the AI's action
+            if board.current_turn == Player::Yellow {
+                // AI's action
+                let random_col = rand::random::<usize>() % board.cols;
+                let mut b = (*board).clone();
+                b.insert_disc(random_col).ok();
+                board.set(b);
+            }
         })
     };
+
     let pixel_size = "100px";
     let button_style = format!("display: grid; grid-template-columns: repeat({}, {});", board.cols, pixel_size);
     let grid_style = format!("display: grid; grid-template-columns: repeat({}, {}); grid-auto-rows: {};", board.cols, pixel_size, pixel_size);
