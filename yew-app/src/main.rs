@@ -739,6 +739,11 @@ fn toot_otto_game() -> Html {
         Callback::from(move |col: usize| {
             if let Some(piece) = *selected_piece {
                 let mut b = (*board).clone();
+                match piece {
+                    Piece::O if b.player1s_O_count > 5 => return,
+                    Piece::T if b.player1s_T_count > 5 => return,
+                    _ => {},
+                }
                 hovered_col.set(None);
                 b.insert_piece(col, piece).ok(); // Handling the insertion and ignoring errors
                 board.set(b); // Update the board state
@@ -911,6 +916,12 @@ fn toot_otto_game() -> Html {
                         })
                     }
                 </div>
+            </div>
+            <div>
+            { format!("TOOT's/Player1's: O left: {}, T left: {}", 6-board.player1s_O_count, 6-board.player1s_T_count) }
+            </div>
+            <div>
+            { format!("OTTO's/Player2's: O left: {}, T left: {}", 6-board.player2s_O_count, 6-board.player2s_T_count) }
             </div>
             <div>
                 {

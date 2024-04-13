@@ -36,6 +36,10 @@ pub struct Board {
     pub cols: usize,
     pub state: State,
     pub last_move: Option<(usize, usize)>, // Track the last move as (row, col)
+    pub player1s_O_count: usize,
+    pub player2s_O_count: usize,
+    pub player1s_T_count: usize,
+    pub player2s_T_count: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -54,6 +58,10 @@ impl Board {
             cols,
             state: State::Running,
             last_move: None,
+            player1s_O_count: 0,
+            player2s_O_count: 0,
+            player1s_T_count: 0,
+            player2s_T_count: 0,
         }
     }
 
@@ -79,10 +87,22 @@ impl Board {
         loop {
             let col = rng.gen_range(0..self.cols);
             let pieces = [Piece::T, Piece::O]; // Array of pieces
-            let piece = *pieces.choose(&mut rng).expect("Failed to select a random piece");
+            let mut piece = Piece::T; // Default piece to T
+            if self.player2s_O_count < 6 && self.player2s_T_count < 6 {
+                piece = *pieces.choose(&mut rng).expect("Failed to select a random piece");
+            } else if self.player2s_O_count >= 6 && self.player2s_T_count < 6 {
+                piece = Piece::T;
+            } else if self.player2s_T_count >= 6 && self.player2s_O_count < 6 {
+                piece = Piece::O;
+            }
 
             if let Ok(_) = self.insert_piece(col, piece) {
                 println!("Computer placed piece on column {}", col + 1);
+                if piece == Piece::T {
+                    self.player2s_T_count += 1;
+                } else {
+                    self.player2s_O_count += 1;
+                }
                 break;
             }
             attempts += 1;
@@ -104,10 +124,22 @@ impl Board {
         loop {
             let offset = offsets[dist.sample(&mut rng)];
             let col = (given_col as isize + offset).clamp(0, self.cols as isize - 1) as usize;
-            let piece = *pieces.choose(&mut rng).expect("Failed to select a random piece");
-    
+            let mut piece = Piece::T; // Default piece to T
+            if self.player2s_O_count < 6 && self.player2s_T_count < 6 {
+                piece = *pieces.choose(&mut rng).expect("Failed to select a random piece");
+            } else if self.player2s_O_count >= 6 && self.player2s_T_count < 6 {
+                piece = Piece::T;
+            } else if self.player2s_T_count >= 6 && self.player2s_O_count < 6 {
+                piece = Piece::O;
+            }
+
             if let Ok(_) = self.insert_piece(col, piece) {
                 println!("Computer placed piece on column {}", col + 1);
+                if piece == Piece::T {
+                    self.player2s_T_count += 1;
+                } else {
+                    self.player2s_O_count += 1;
+                }
                 break;
             }
             attempts += 1;
@@ -131,6 +163,13 @@ impl Board {
             if matches!(self.grid[row][col], Cell::Empty) {
                 self.grid[row][col] = Cell::Occupied(piece);
                 self.last_move = Some((row, col));
+                match self.current_turn {
+                    Player::Toot => match piece {
+                        Piece::T => self.player1s_T_count += 1,
+                        Piece::O => self.player1s_O_count += 1,
+                    },
+                    Player::Otto =>()
+                }
                 match self.check_win(row, col) {
                     Some(Winner::Player(player)) => {
                         self.state = State::Won(player);
